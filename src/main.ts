@@ -28,59 +28,60 @@ const t7 = [
 type Version = string[]
 
 class Editor {
-  version: Version = []
+  currentVersion: Version = []
   history: Version[] = []
   historyCursor: number | undefined = undefined
 
+  private setVersionAndAddToHistory = (version: Version): void => {
+    // TODO: write the if statement to check if there are any versions in history after the historyCursor.
+    this.currentVersion = version
+    this.history.push(version)
+  }
+
+  // TODO: if adding to currentVersion && there is more items in history after historyCursor, remove them.
   /**
    * @param stringToAdd is the string you want to add to the version.
    */
   add = (stringToAdd: string): void => {
-    // Take the previous version and add to it, then push the result to the history.
-    // concat method returns a new array.
-    const newVersion = this.version.concat(stringToAdd)
-    this.version = newVersion
-    this.history.push(newVersion)
+    const newVersion = [ ...this.currentVersion, stringToAdd ]
+    this.setVersionAndAddToHistory(newVersion)
   }
 
+  // TODO: if adding to currentVersion && there is more items in history after historyCursor, remove them.
   /**
    * @param modification is the string which will replace the last string which got added to the version.
    * @throws if there is nothing to edit (version array is empty).
   */
   edit = (modification: string): void => { 
-    if (this.version.length === 0) throw new Error("Nothing to edit. Version is empty.")
-    const lastIndex = this.version.length - 1
-    // Make a shallow copy of the version array. Since we are dealing with primitives (strings) inside the array we don't need to make a deep
-    // copy and can use shallow copy instead.
-    // Then replace the last element with the modification and push the result to the history. 
-    const versionCopy = [...this.version]
+    if (this.currentVersion.length === 0) throw new Error("Nothing to edit. Current version is empty.")
+    // Make a shallow copy of the currentVersion array. Since we are dealing with primitives
+    // (strings) inside the array we don't need to make a deep copy and can use shallow copy
+    // instead. Then replace the last element with the modification and push the result to the history. 
+    const versionShallowCopy = [...this.currentVersion]
     // Update version with the latest version.
-    versionCopy.splice(lastIndex, 1, modification)
-    this.version = versionCopy
-    this.history.push(this.version)
+    versionShallowCopy.pop()
+    versionShallowCopy.push(modification)
+    this.setVersionAndAddToHistory(versionShallowCopy)
   }
 
+  // TODO: if adding to currentVersion && there is more items in history after historyCursor, remove them.
   /**
    * @throws if there is nothing to delete (version array is empty).
    */
   delete = (): void => { 
-    if(this.version.length === 0) throw new Error("Nothing to delete. Version is empty.")
-    // Access the last element in the version array and remove it.
-    const lastIndex = this.version.length - 1
-    // Make a shallow copy of the current version. Then remove the last element of the deep copy.
+    if(this.currentVersion.length === 0) throw new Error("Nothing to delete. Current version is empty.")
+    // Make a shallow copy of the current version. Then remove its last element.
     // Update current version with the modified version and push the result to the history.
-    const versionCopy = [...this.version]
-    versionCopy.splice(lastIndex, 1)
-    this.version = versionCopy
-    this.history.push(this.version)
+    const versionShallowCopy = [...this.currentVersion]
+    versionShallowCopy.pop()
+    this.setVersionAndAddToHistory(versionShallowCopy)
   }
 
   /**
    * 
    * @returns the previous version in the history.
-   * @throws if the history is empty or if undoRedoIndex is less than 0 (out of bounds).
+   * @throws if the history is empty or if historyCursor is less than 0 (out of bounds).
    */
-  // When I call undo, make a new instance of the Editor class. The default 
   undo = (): string => {
     if (this.history.length === 0) throw new Error("Nothing to undo. History is empty.")
     if (this.historyCursor === undefined) this.historyCursor = this.history.length - 1
@@ -90,9 +91,10 @@ class Editor {
       this.historyCursor++
       throw new Error("Nothing to undo. The previous version you saw is the first version in history.")
     }
-    return this.history[ this.historyCursor ].join("")
-
+    this.currentVersion = this.history[this.historyCursor]
+    return this.history[this.historyCursor].join("")
   }
+
    /**
     * 
     * @returns the next version in the history.
@@ -109,6 +111,7 @@ class Editor {
       this.historyCursor--
       throw new Error("Nothing to redo. You are seeing the last version.")
     }
+    // TODO: update the current version.
     return this.history[this.historyCursor].join("")
   }
 

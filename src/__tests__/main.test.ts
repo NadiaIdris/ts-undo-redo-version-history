@@ -10,7 +10,7 @@ test("editing works", () => {
   const editor = new Editor()
 
   // Version is empty, nothing to edit.
-  expect(() => editor.edit("foo")).toThrow("Nothing to edit. Version is empty.")
+  expect(() => editor.edit("foo")).toThrow("Nothing to edit. Current version is empty.")
 
   editor.add("foo")
   editor.add("bar")
@@ -23,7 +23,7 @@ test("deleting works", () => {
   const editor = new Editor()
 
   // Version is empty, nothing to delete.
-  expect(() => editor.delete()).toThrow("Nothing to delete. Version is empty.")
+  expect(() => editor.delete()).toThrow("Nothing to delete. Current version is empty.")
 
   editor.add("foo")
   editor.add("bar")
@@ -39,7 +39,7 @@ test("deleting works", () => {
   editor.delete()
   expect(editor.dump()).toEqual("")
 
-  expect(() => editor.delete()).toThrow("Nothing to delete. Version is empty.")
+  expect(() => editor.delete()).toThrow("Nothing to delete. Current version is empty.")
 })
 
 test("undo works", () => {
