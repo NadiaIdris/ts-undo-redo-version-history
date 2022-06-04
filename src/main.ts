@@ -9,11 +9,11 @@ const t4 = [ "foo", "bar" ]
 const t5 = [ "foo", "abc" ]
 // DS after undoing "abc" (data to return: [ "foo", "bar" ])
 const t6 = [
-  [ t1 ],
-  [ t2 ], // return this
-  [ t3 ],
-  [ t4 ], 
-  [ t5 ],
+   t1,
+   t2, // return this
+   t3,
+   t4, 
+   t5,
 ]
 
 const t7 = [
@@ -30,7 +30,7 @@ type Version = string[]
 class Editor {
   version: Version = []
   history: Version[] = []
-  undoRedoIndex: number | undefined = undefined
+  historyCursor: number | undefined = undefined
 
   /**
    * @param stringToAdd is the string you want to add to the version.
@@ -83,14 +83,14 @@ class Editor {
   // When I call undo, make a new instance of the Editor class. The default 
   undo = (): string => {
     if (this.history.length === 0) throw new Error("Nothing to undo. History is empty.")
-    if (this.undoRedoIndex === undefined) this.undoRedoIndex = this.history.length - 1
-    this.undoRedoIndex--
+    if (this.historyCursor === undefined) this.historyCursor = this.history.length - 1
+    this.historyCursor--
 
-    if (this.undoRedoIndex === -1) {
-      this.undoRedoIndex++
+    if (this.historyCursor === -1) {
+      this.historyCursor++
       throw new Error("Nothing to undo. The previous version you saw is the first version in history.")
     }
-    return this.history[ this.undoRedoIndex ].join("")
+    return this.history[ this.historyCursor ].join("")
 
   }
    /**
@@ -100,16 +100,16 @@ class Editor {
     */
   redo = (): string => {
     if (this.history.length === 0) throw new Error("Nothing to redo. History is empty.")
-    if (this.undoRedoIndex === undefined) this.undoRedoIndex = this.history.length - 1
-    this.undoRedoIndex++ 
+    if (this.historyCursor === undefined) this.historyCursor = this.history.length - 1
+    this.historyCursor++ 
 
-    if (this.undoRedoIndex === this.history.length) {
+    if (this.historyCursor === this.history.length) {
       // Decrement the undoRedoIndex to make sure if redo gets called again, this if statement will
       // execute and the error message below will be thrown again.
-      this.undoRedoIndex--
+      this.historyCursor--
       throw new Error("Nothing to redo. You are seeing the last version.")
     }
-    return this.history[this.undoRedoIndex].join("")
+    return this.history[this.historyCursor].join("")
   }
 
   dump = (): string => {
