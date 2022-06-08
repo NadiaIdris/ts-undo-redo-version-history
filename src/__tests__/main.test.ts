@@ -88,3 +88,36 @@ test("redo works", () => {
   expect(() => editor.redo()).toThrow("Nothing to redo. You are seeing the last version.")
   expect(() => editor.redo()).toThrow("Nothing to redo. You are seeing the last version.")
 })
+
+test("removing the rest of the history works", () => { 
+  // Make a new Editor.
+  const editor = new Editor()
+  // Add 4 strings to the editor.
+  editor.add("foo")
+  expect(editor.currentVersion).toEqual(["foo"])
+  editor.add("bar")
+  expect(editor.currentVersion).toEqual(["foo", "bar"])
+  editor.add("baz")
+  expect(editor.currentVersion).toEqual(["foo", "bar", "baz"])
+  editor.add("zoo")
+  expect(editor.currentVersion).toEqual(["foo", "bar", "baz", "zoo"])
+
+  // Undo 2 times.
+  editor.undo()
+  expect(editor.currentVersion).toEqual(["foo", "bar", "baz"])
+  editor.undo()
+  expect(editor.currentVersion).toEqual(["foo", "bar"])
+
+  // Add another string.
+  editor.add("new")
+  expect(editor.currentVersion).toEqual(["foo", "bar", "new"])
+  expect(editor.history.length).toEqual(3)
+  expect(editor.dump()).toEqual("foobarnew")
+
+  // Check the history version removal also for the edit and delete methods.
+  editor.undo()
+  expect(editor.currentVersion).toEqual(["foo", "bar"])
+  editor.undo()
+  editor.edit("thisShouldBeTheFirstString")
+
+})

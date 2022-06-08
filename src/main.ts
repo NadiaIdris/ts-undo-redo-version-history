@@ -1,4 +1,7 @@
 // ------------- Figuring out the data structures to use ---------------
+
+import _ = require("lodash")
+
 // DS after adding "foo", "bar" and "baz"
 const t1 = [ "foo" ]
 const t2 = ["foo", "bar"]
@@ -20,6 +23,7 @@ const t7 = [
   [ "foo" ],
   [ "foo", "bar" ],
   [ "foo", "bar", "baz" ],
+  // [ "foo", "bar", "baz", "zoo" ],
   [ "foo", "bar" ],
   [ "foo", "abc" ],
 ]
@@ -33,12 +37,19 @@ class Editor {
   historyCursor: number | undefined = undefined
 
   private setVersionAndAddToHistory = (version: Version): void => {
-    // TODO: write the if statement to check if there are any versions in history after the historyCursor.
     this.currentVersion = version
+    // If there are any versions after the historyCursor, then remove them.
+    if (this.history.length > this.historyCursor! + 1) { 
+      // Make a defensive deep copy of the history array. Remove the versions after the historyCursor.
+      // Update the this.history with the new array.
+      const historyCopy = _.cloneDeep(this.history)
+      historyCopy.splice(this.historyCursor! + 1)
+      this.history = historyCopy
+    }
+
     this.history.push(version)
   }
 
-  // TODO: if adding to currentVersion && there is more items in history after historyCursor, remove them.
   /**
    * @param stringToAdd is the string you want to add to the version.
    */
@@ -47,7 +58,6 @@ class Editor {
     this.setVersionAndAddToHistory(newVersion)
   }
 
-  // TODO: if adding to currentVersion && there is more items in history after historyCursor, remove them.
   /**
    * @param modification is the string which will replace the last string which got added to the version.
    * @throws if there is nothing to edit (version array is empty).
@@ -64,7 +74,6 @@ class Editor {
     this.setVersionAndAddToHistory(versionShallowCopy)
   }
 
-  // TODO: if adding to currentVersion && there is more items in history after historyCursor, remove them.
   /**
    * @throws if there is nothing to delete (version array is empty).
    */
