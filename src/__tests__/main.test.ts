@@ -89,35 +89,45 @@ test("redo works", () => {
   expect(() => editor.redo()).toThrow("Nothing to redo. You are seeing the last version.")
 })
 
-test("removing the rest of the history works", () => { 
+test("removing the rest of the history (when add, edit, delete) works", () => {
   // Make a new Editor.
   const editor = new Editor()
   // Add 4 strings to the editor.
   editor.add("foo")
-  expect(editor.currentVersion).toEqual(["foo"])
+  expect(editor.currentVersion).toEqual([ "foo" ])
   editor.add("bar")
-  expect(editor.currentVersion).toEqual(["foo", "bar"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar" ])
   editor.add("baz")
-  expect(editor.currentVersion).toEqual(["foo", "bar", "baz"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar", "baz" ])
   editor.add("zoo")
-  expect(editor.currentVersion).toEqual(["foo", "bar", "baz", "zoo"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar", "baz", "zoo" ])
 
   // Undo 2 times.
   editor.undo()
-  expect(editor.currentVersion).toEqual(["foo", "bar", "baz"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar", "baz" ])
   editor.undo()
-  expect(editor.currentVersion).toEqual(["foo", "bar"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar" ])
 
   // Add another string.
   editor.add("new")
-  expect(editor.currentVersion).toEqual(["foo", "bar", "new"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar", "new" ])
   expect(editor.history.length).toEqual(3)
   expect(editor.dump()).toEqual("foobarnew")
 
   // Check the history version removal also for the edit and delete methods.
   editor.undo()
-  expect(editor.currentVersion).toEqual(["foo", "bar"])
+  expect(editor.currentVersion).toEqual([ "foo", "bar" ])
   editor.undo()
+  // Editing in the middle of the history works (history gets shortened and currentVersionIndex gets updated).
   editor.edit("thisShouldBeTheFirstString")
-
+  expect(editor.currentVersion).toEqual([ "thisShouldBeTheFirstString" ])
+  // Deleting in the middle of the history works (history gets shortened and currentVersionIndex gets
+  // updated).
+  editor.add("1")
+  editor.add("2")
+  expect(editor.currentVersion).toEqual([ "thisShouldBeTheFirstString", "1", "2" ])
+  editor.undo()
+  editor.undo()
+  editor.delete()
+  expect(editor.dump()).toEqual("")
 })

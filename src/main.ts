@@ -33,21 +33,21 @@ type Version = string[]
 
 class Editor {
   currentVersion: Version = []
+  currentVersionIndex: number = 0
   history: Version[] = []
-  historyCursor: number | undefined = undefined
 
   private setVersionAndAddToHistory = (version: Version): void => {
     this.currentVersion = version
-    // If there are any versions after the historyCursor, then remove them.
-    if (this.history.length > this.historyCursor! + 1) { 
-      // Make a defensive deep copy of the history array. Remove the versions after the historyCursor.
-      // Update the this.history with the new array.
+    // If there are any versions after the currentVersionIndex position, then remove them.
+    if (this.history.length > this.currentVersionIndex! + 1) { 
+      // Make a defensive deep copy of the history array. Remove the versions after the currentVersionIndex
+      // position. Update the this.history with the new historyCopy reference.
       const historyCopy = _.cloneDeep(this.history)
-      historyCopy.splice(this.historyCursor! + 1)
+      historyCopy.splice(this.currentVersionIndex! + 1)
       this.history = historyCopy
     }
-
     this.history.push(version)
+    this.currentVersionIndex = this.getLastIndex()
   }
 
   /**
@@ -84,24 +84,26 @@ class Editor {
     const versionShallowCopy = [...this.currentVersion]
     versionShallowCopy.pop()
     this.setVersionAndAddToHistory(versionShallowCopy)
+    // Update currentVersionIndex to the last index in the history.
   }
 
   /**
    * 
    * @returns the previous version in the history.
-   * @throws if the history is empty or if historyCursor is less than 0 (out of bounds).
+   * @throws if the history is empty or if currentVersionIndex is less than 0 (out of bounds).
    */
   undo = (): string => {
-    if (this.history.length === 0) throw new Error("Nothing to undo. History is empty.")
-    if (this.historyCursor === undefined) this.historyCursor = this.history.length - 1
-    this.historyCursor--
+    if (this.historyIsEmpty()) throw new Error("Nothing to undo. History is empty.")
+    this.currentVersionIndex--
 
-    if (this.historyCursor === -1) {
-      this.historyCursor++
+    // If currentVersionIndex is out of bounds, then thow an error.
+    if (this.currentVersionIndex < 0) {
+      // Reset the currentVersionIndex.
+      this.currentVersionIndex++
       throw new Error("Nothing to undo. The previous version you saw is the first version in history.")
     }
-    this.currentVersion = this.history[this.historyCursor]
-    return this.history[this.historyCursor].join("")
+    this.currentVersion = this.history[this.currentVersionIndex]
+    return this.dump()
   }
 
    /**
@@ -110,26 +112,34 @@ class Editor {
     * @throws if the history is empty or if undoRedoIndex is the same as than the length of the history (out of bounds).
     */
   redo = (): string => {
-    if (this.history.length === 0) throw new Error("Nothing to redo. History is empty.")
-    if (this.historyCursor === undefined) this.historyCursor = this.history.length - 1
-    this.historyCursor++ 
+    if (this.historyIsEmpty()) throw new Error("Nothing to redo. History is empty.")
+    this.currentVersionIndex++ 
 
-    if (this.historyCursor === this.history.length) {
-      // Decrement the undoRedoIndex to make sure if redo gets called again, this if statement will
-      // execute and the error message below will be thrown again.
-      this.historyCursor--
+    // If the currentVersionIndex is out of bounds, then throw an error.
+    if (this.currentVersionIndex > this.getLastIndex()) {
+      // Reset the currentVersionIndex.
+      this.currentVersionIndex--
       throw new Error("Nothing to redo. You are seeing the last version.")
     }
-    // TODO: update the current version.
-    return this.history[this.historyCursor].join("")
+    this.currentVersion = this.history[this.currentVersionIndex]
+    return this.dump()
   }
 
   dump = (): string => {
-    // Get the last element of the history array and join it as a string.
-    const lastIndex = this.history.length - 1
-    return this.history[lastIndex].join("")
+    // The reason we have to return currentVersion instead of the last element of the history array
+    // is that if we do undo/redo, the currentVersion will not be the last element of the history
+    // array anymore.
+    return this.currentVersion.join("")
   }
 
+  // Internal methods for code readability.
+  private historyIsEmpty = (): boolean => {
+    return this.history.length === 0
+  }
+
+  private getLastIndex = (): number => {
+    return this.history.length - 1
+   }
 }
 
 export { Editor }
