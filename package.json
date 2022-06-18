@@ -1,5 +1,5 @@
 {
-  "name": "ts-ccn-example",
+  "name": "ts-undo-redo-version-history",
   "version": "1.0.0",
   "scripts": {
     "test": "jest",

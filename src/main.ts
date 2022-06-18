@@ -1,6 +1,6 @@
-// ------------- Figuring out the data structures to use ---------------
-
 import _ = require("lodash")
+
+// ------------- Figuring out the data structures to use ---------------
 
 // DS after adding "foo", "bar" and "baz"
 const t1 = [ "foo" ]
