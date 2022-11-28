@@ -23,6 +23,7 @@ interface EditorInterface {
   edit: (newWord: string) => void;
   undo: () => void;
   redo: () => void;
+  toString: () => string;
 }
 
 class Editor implements EditorInterface {
@@ -30,52 +31,29 @@ class Editor implements EditorInterface {
   history: EditorState[] = [];
   indexToDisplay: number = 0;
 
-  // /** Take the word and add it to the editorState array. Then add the editorState array to history array. */
-  // add = (word: string) => {
-  //   // Make a copy of editorState and modify the copy.
-  //   const copyOfState = [...this.editorState];
-  //   copyOfState.push(word);
-  //   // If history is empty, add the word to the history array.
-  //   if (this.history.length === 0) {
-  //     // Update the editorState and history with the new editorState.
-  //     this.editorState = copyOfState;
-  //     this.history.push(copyOfState);
-  //     this.indexToDisplay = 0;
-  //     return;
-  //   }
-  //   const lastIndexOfHistory = this.history.length - 1;
-  //   // If indexToDisplay is in the middle or start of the array.
-  //   if (this.indexToDisplay !== lastIndexOfHistory) {
-  //     // Chop off the history array from the indexOfStateToDisplay till the end.
-  //     this.history.splice(this.indexToDisplay + 1);
-  //   }
-
-  //   // Update the editorState and history with the new editorState.
-  //   this.editorState = copyOfState;
-  //   this.history.push(copyOfState);
-  //   // Every time when we add a word, we need to update the indexOfStateToDisplay.
-  //   this.history.length === 1
-  //     ? (this.indexToDisplay = 0)
-  //     : this.indexToDisplay++;
-  // };
-
-  // Add method without making a copy of editorState.
   /** Take the word and add it to the editorState array. Then add the editorState array to history array. */
   add = (word: string) => {
-    this.editorState.push(word);
-
+    // Make a copy of editorState and modify the copy.
+    const copyOfState = [...this.editorState];
+    copyOfState.push(word);
+    // If history is empty, add the word to the history array.
     if (this.history.length === 0) {
-      this.history.push(this.editorState);
+      // Update the editorState and history with the new editorState.
+      this.editorState = copyOfState;
+      this.history.push(copyOfState);
       this.indexToDisplay = 0;
       return;
     }
-
     const lastIndexOfHistory = this.history.length - 1;
+    // If indexToDisplay is in the middle or start of the array.
     if (this.indexToDisplay !== lastIndexOfHistory) {
+      // Chop off the history array from the indexOfStateToDisplay till the end.
       this.history.splice(this.indexToDisplay + 1);
     }
 
-    this.history.push(this.editorState);
+    // Update the editorState and history with the new editorState.
+    this.editorState = copyOfState;
+    this.history.push(copyOfState);
     // Every time when we add a word, we need to update the indexOfStateToDisplay.
     this.history.length === 1
       ? (this.indexToDisplay = 0)
@@ -184,11 +162,10 @@ class Editor implements EditorInterface {
     }
   };
 
-  // TODO: delete the stuff below.
-  private _myPrivateFunction = () => {}; // arrow functions are visibile in the class when console.logging the propeties.
-  private myPrivateFunction2() { } // function definitions inside classes are not visible in the console.
-  myPublicFunction() { } // function definitions inside classes are not visible in the console. 
-  myPublicFunction2 = function myFunction() { } // because fn is saved in a variables it is visible in the console.
+  /** Takes the current state of what's displayed in the editor and return it as a string.  */
+  toString = () => { 
+    return this.editorState.join(" ");
+  };
 }
 
 export default Editor;
